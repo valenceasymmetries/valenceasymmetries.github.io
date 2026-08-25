@@ -1,0 +1,156 @@
+
+body { 
+  font-family: sans-serif; 
+  margin: 2rem; 
+}
+
+h1, h2, h3 { 
+  margin-top: 1.5rem; 
+  color: #c7102e;
+}
+
+details { 
+  margin: 0.4rem 0; 
+  margin: 10px 0;
+  border: none;
+  padding: 0;
+}
+.speaker-info { 
+  margin-left: 1rem; 
+}
+
+.embed-container a { 
+  text-decoration: none; 
+}  
+/* caret before text */
+.details-summary::before {
+  /*content: "▸";*/
+  display: inline-block;
+  margin-right: 0.5em;
+  transition: transform 0.2s ease;
+}
+.details-sub::before {
+  /*content: "▸";*/
+  display: inline-block;
+  margin-right: 1.5em;
+  transition: transform 0.2s ease;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.speaker-info {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.embed-container {
+  margin-top: 15px;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+.embed-container iframe {
+  width: 100%;
+  height: 400px;
+  border: none;
+}
+
+.embed-placeholder {
+  color: #666;
+  font-style: italic;
+}
+
+
+.site-nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* reuse your existing link styles */
+.site-nav a {
+  margin-left: 20px;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: #91d0ba;
+}
+
+.nav-toggle {
+  display: none; /* hidden on desktop */
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  .site-nav {
+    justify-content: space-between;
+  }
+
+  .nav-toggle {
+    display: inline-block;
+    background: none;
+    border: 1px solid #91d0ba;
+    color: #91d0ba;
+    padding: 6px 10px;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .nav-links a {
+    display: block;
+    margin: 8px 0;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+}
+
+.footer-image {
+  display: block;
+  margin: 2rem auto 0 auto; /* top margin + center */
+  width: 600px;             /* exact width you want */
+  max-width: 100%;          /* ensures it never overflows container */
+  height: auto;             /* keep aspect ratio */
+}
+
+.footer-text {
+  display: block;
+  font-size: 10px;
+  text-align: center;
+  margin: 2rem auto 0 auto; /* top margin + center */
+  width: 1000px;             /* exact width you want */
+  max-width: 100%;          /* ensures it never overflows container */
+  height: auto;             /* keep aspect ratio */
+}
+
+.publications-table {
+  border: none;
+  border-collapse: collapse;
+  width: 100%;
+}
+.publications-table td {
+  border: none;
+  padding: 8px 0;
+  vertical-align: top;
+}
+.publications-table .year {
+  width: 80px;
+  font-weight: bold;
+  color: #666;
+}
+.publications-table .citation {
+  padding-left: 20px;
+}
