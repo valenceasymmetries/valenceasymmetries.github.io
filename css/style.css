@@ -1,39 +1,28 @@
+/* =========================
+   General
+   ========================= */
 
-body { 
-  font-family: sans-serif; 
-  margin: 2rem; 
+body {
+  font-family: sans-serif;
+  margin: 2rem;
 }
 
-h1, h2, h3 { 
-  margin-top: 1.5rem; 
+h1,
+h2,
+h3 {
+  margin-top: 1.5rem;
   color: #c7102e;
 }
 
-details { 
-  margin: 0.4rem 0; 
+
+/* =========================
+   Speaker / Details
+   ========================= */
+
+details {
   margin: 10px 0;
   border: none;
   padding: 0;
-}
-.speaker-info { 
-  margin-left: 1rem; 
-}
-
-.embed-container a { 
-  text-decoration: none; 
-}  
-/* caret before text */
-.details-summary::before {
-  /*content: "▸";*/
-  display: inline-block;
-  margin-right: 0.5em;
-  transition: transform 0.2s ease;
-}
-.details-sub::before {
-  /*content: "▸";*/
-  display: inline-block;
-  margin-right: 1.5em;
-  transition: transform 0.2s ease;
 }
 
 summary {
@@ -47,12 +36,72 @@ summary {
   padding-left: 20px;
 }
 
+/* Nested subsections */
+.subsection {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.subsection > summary {
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.subsection > details {
+  margin-left: 20px;
+}
+
+
+/* Main section */
+details > summary {
+  cursor: pointer;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #c7102e;
+  margin: 12px 0;
+}
+
+
+/* Year / subsection */
+details.subsection {
+  margin-left: 20px;
+  font-size: 1.15em;
+}
+
+details.subsection > summary {
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  color: #555;
+  margin: 8px 0;
+}
+
+
+/* Speaker */
+details.subsection > details {
+  margin-left: 20px;
+}
+
+details.subsection > details > summary {
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: normal;
+  color: #333;
+}
+
+/* =========================
+   Embedded Content
+   ========================= */
+
 .embed-container {
   margin-top: 15px;
   border: none;
-  border-radius: 0;
   padding: 0;
-  background-color: transparent;
+  background: transparent;
+}
+
+.embed-container a {
+  text-decoration: none;
 }
 
 .embed-container iframe {
@@ -67,13 +116,16 @@ summary {
 }
 
 
+/* =========================
+   Navigation
+   ========================= */
+
 .site-nav {
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-/* reuse your existing link styles */
 .site-nav a {
   margin-left: 20px;
   font-size: 20px;
@@ -82,23 +134,78 @@ summary {
 }
 
 .nav-toggle {
-  display: none; /* hidden on desktop */
+  display: none;
 }
 
-/* Mobile layout */
+
+/* =========================
+   Footer
+   ========================= */
+
+.footer-image {
+  display: block;
+  width: 600px;
+  max-width: 100%;
+  height: auto;
+  margin: 2rem auto 0;
+}
+
+.footer-text {
+  display: block;
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto 0;
+  font-size: 10px;
+  text-align: center;
+}
+
+
+/* =========================
+   Publications
+   ========================= */
+
+.publications-table {
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+}
+
+.publications-table td {
+  padding: 8px 0;
+  border: none;
+  vertical-align: top;
+}
+
+.publications-table .year {
+  width: 80px;
+  font-weight: bold;
+  color: #666;
+}
+
+.publications-table .citation {
+  padding-left: 20px;
+}
+
+
+/* =========================
+   Mobile
+   ========================= */
+
 @media (max-width: 768px) {
+
   .site-nav {
     justify-content: space-between;
   }
 
   .nav-toggle {
     display: inline-block;
-    background: none;
-    border: 1px solid #91d0ba;
-    color: #91d0ba;
     padding: 6px 10px;
+    border: 1px solid #91d0ba;
+    background: none;
+    color: #91d0ba;
     font-size: 16px;
     text-transform: uppercase;
+    cursor: pointer;
   }
 
   .nav-links {
@@ -116,41 +223,4 @@ summary {
   .nav-links.open {
     display: flex;
   }
-}
-
-.footer-image {
-  display: block;
-  margin: 2rem auto 0 auto; /* top margin + center */
-  width: 600px;             /* exact width you want */
-  max-width: 100%;          /* ensures it never overflows container */
-  height: auto;             /* keep aspect ratio */
-}
-
-.footer-text {
-  display: block;
-  font-size: 10px;
-  text-align: center;
-  margin: 2rem auto 0 auto; /* top margin + center */
-  width: 1000px;             /* exact width you want */
-  max-width: 100%;          /* ensures it never overflows container */
-  height: auto;             /* keep aspect ratio */
-}
-
-.publications-table {
-  border: none;
-  border-collapse: collapse;
-  width: 100%;
-}
-.publications-table td {
-  border: none;
-  padding: 8px 0;
-  vertical-align: top;
-}
-.publications-table .year {
-  width: 80px;
-  font-weight: bold;
-  color: #666;
-}
-.publications-table .citation {
-  padding-left: 20px;
 }
