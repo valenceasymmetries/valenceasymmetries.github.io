@@ -63,24 +63,28 @@ import os
 # Parse PDF filename
 #
 # Expected format:
+#
 # YEAR-MONTH-CONFERENCE-extra-information.pdf
 #
 # Examples:
-# 2026-08-ESSLLI.pdf
-# 2026-08-ESSLLI-Course.pdf
+# 2026-06-PLM-talk-Slursarepernicious.pdf
+# 2026-04-TSAcolloquium-talk-moralthoughtsharing.pdf
+# 2026-03-UCL-talk-axiologicallyopposedadjectives.pdf
 #
-# The link text will simply be:
-# ESSLLI
+# The link text will be:
+# PLM
+# TSAcolloquium
+# UCL
 # ============================================================
 
 def parse_filename(path):
+
     parts = path.stem.split("-")
 
     if len(parts) < 3:
         return None
 
     year = parts[0]
-    month = parts[1]
     conference = parts[2]
 
     return {
@@ -94,58 +98,63 @@ def parse_filename(path):
 # ============================================================
 
 def collect_files(root):
+
     structure = defaultdict(list)
 
     for pdf in root.rglob("*.pdf"):
 
-        relative_parent = pdf.parent.relative_to(root)
-
         info = parse_filename(pdf)
 
-        if info is not None:
-            structure[str(relative_parent)].append(
-                (pdf, info)
-            )
+        if info is None:
+            continue
+
+        # Directory relative to root
+        relative_parent = pdf.parent.relative_to(root)
+
+        structure[str(relative_parent)].append(
+            (pdf, info)
+        )
 
     return structure
 
 
 # ============================================================
-# Get all directories
+# Get top-level team member directories
 # ============================================================
 
-def get_all_directories(root):
-
-    directories = []
-
-    for directory in root.rglob("*"):
-
-        if directory.is_dir():
-            directories.append(directory)
-
-    return sorted(
-        directories,
-        key=lambda p: str(p)
-    )
-
-
-# ============================================================
-# Get immediate child directories
-# ============================================================
-
-def get_child_directories(
-    directory,
-    all_directories
-):
+def get_team_members(root):
 
     return sorted(
         [
-            candidate
-            for candidate in all_directories
-            if candidate.parent == directory
+            directory
+            for directory in root.iterdir()
+            if directory.is_dir()
         ],
         key=lambda p: p.name.lower()
     )
+
+
+# ============================================================
+# Get all PDFs belonging to one team member
+# ============================================================
+
+def get_team_member_files(
+    team_member,
+    root
+):
+
+    files = []
+
+    for pdf in team_member.rglob("*.pdf"):
+
+        info = parse_filename(pdf)
+
+        if info is not None:
+            files.append(
+                (pdf, info)
+            )
+
+    return files
 
 
 # ============================================================
@@ -177,38 +186,21 @@ def year_sort_key(year):
 
 
 # ============================================================
-# Generate the contents for one team member
+# Generate HTML for one team member
 # ============================================================
 
 def generate_team_member_html(
-    directory,
+    team_member,
     root,
-    structure,
     output_path
 ):
 
     html = []
 
-    # --------------------------------------------------------
-    # Find all PDFs belonging to this team member
-    # --------------------------------------------------------
-
-    team_member_files = []
-
-    for relative_directory, files in structure.items():
-
-        relative_path = Path(relative_directory)
-
-        # Is this directory inside the current team member?
-        try:
-            relative_path.relative_to(
-                directory.relative_to(root)
-            )
-
-            team_member_files.extend(files)
-
-        except ValueError:
-            pass
+    files = get_team_member_files(
+        team_member,
+        root
+    )
 
     # --------------------------------------------------------
     # Group PDFs by year
@@ -216,7 +208,7 @@ def generate_team_member_html(
 
     years = defaultdict(list)
 
-    for pdf_path, info in team_member_files:
+    for pdf_path, info in files:
 
         years[info["year"]].append(
             (pdf_path, info)
@@ -234,30 +226,42 @@ def generate_team_member_html(
     for year in sorted_years:
 
         # ====================================================
-        # YEAR = collapsible
+        # YEAR DETAILS
         # ====================================================
 
         html.append(
-            '<details class="subsection">'
+            '        <details class="subsection">'
         )
 
         html.append(
-            f"<summary>{year}</summary>"
+            f'          <summary>{year}'
         )
 
         html.append(
-            '<div class="speaker-info">'
+            '            <span class="caret"></span>'
+        )
+
+        html.append(
+            '          </summary>'
+        )
+
+        html.append(
+            ''
+        )
+
+        html.append(
+            '          <div class="speaker-info">'
         )
 
         # ----------------------------------------------------
-        # PDFs / conferences
+        # Files within year
         # ----------------------------------------------------
 
         year_files = sorted(
             years[year],
-            key=lambda x: (
-                x[1]["conference"].lower(),
-                x[0].name.lower()
+            key=lambda item: (
+                item[1]["conference"].lower(),
+                item[0].name.lower()
             )
         )
 
@@ -271,26 +275,28 @@ def generate_team_member_html(
             conference = info["conference"]
 
             html.append(
-                f'<div>'
-                f'<a href="{href}">'
+                f'            <div><a href="{href}">'
                 f'{conference}'
-                f'</a>'
-                f'</div>'
+                f'</a></div>'
             )
 
         html.append(
-            "</div>"
+            '          </div>'
         )
 
         html.append(
-            "</details>"
+            '        </details>'
+        )
+
+        html.append(
+            ''
         )
 
     return "\n".join(html)
 
 
 # ============================================================
-# Generate complete HTML
+# Generate complete HTML page
 # ============================================================
 
 def generate_html(
@@ -298,18 +304,14 @@ def generate_html(
     output_path
 ):
 
-    structure = collect_files(root)
-
-    all_directories = get_all_directories(root)
-
     html = []
 
     # ========================================================
-    # HTML header
+    # HTML HEADER
     # ========================================================
 
     html.append(
-        "<!DOCTYPE html>"
+        '<!DOCTYPE html>'
     )
 
     html.append(
@@ -317,107 +319,152 @@ def generate_html(
     )
 
     html.append(
-        "<head>"
+        '<head>'
     )
 
     html.append(
-        '<meta charset="UTF-8">'
+        '  <meta charset="UTF-8">'
     )
 
     html.append(
-        '<meta name="viewport" '
+        '  <meta name="viewport" '
         'content="width=device-width, initial-scale=1.0">'
     )
 
     html.append(
-        "<title>VA Team</title>"
+        '  <title>VA Team</title>'
     )
 
-    # Your existing stylesheet
+    # Existing stylesheet
     html.append(
-        '<link rel="stylesheet" href="style.css">'
-    )
-
-    html.append(
-        "</head>"
+        '  <link rel="stylesheet" href="style.css">'
     )
 
     html.append(
-        "<body>"
+        '</head>'
+    )
+
+    html.append(
+        '<body>'
+    )
+
+    html.append(
+        ''
     )
 
     # ========================================================
-    # VA_team
+    # VA TEAM — OUTER DETAILS
     # ========================================================
 
     html.append(
-        "<h2>VA_team</h2>"
+        '<details>'
+    )
+
+    html.append(
+        '  <summary class="details-summary">'
+    )
+
+    html.append(
+        '    VA Team'
+    )
+
+    html.append(
+        '    <span class="caret"></span>'
+    )
+
+    html.append(
+        '  </summary>'
+    )
+
+    html.append(
+        ''
     )
 
     # ========================================================
-    # Team members
+    # TEAM MEMBERS
     # ========================================================
 
-    team_members = [
-        directory
-        for directory in all_directories
-        if directory.parent == root
-    ]
-
-    team_members = sorted(
-        team_members,
-        key=lambda p: p.name.lower()
-    )
+    team_members = get_team_members(root)
 
     for team_member in team_members:
 
+        html.append(
+            '      <details class="subsection">'
+        )
+
+        html.append(
+            f'        <summary>{team_member.name}'
+        )
+
+        html.append(
+            '          <span class="caret"></span>'
+        )
+
+        html.append(
+            '        </summary>'
+        )
+
+        html.append(
+            ''
+        )
+
+        html.append(
+            '        <div class="speaker-info">'
+        )
+
         # ----------------------------------------------------
-        # Team member = collapsible
+        # Years + conference links
         # ----------------------------------------------------
 
-        html.append(
-            '<details class="subsection">'
+        team_member_html = generate_team_member_html(
+            team_member,
+            root,
+            output_path
         )
 
-        html.append(
-            f"<summary>{team_member.name}</summary>"
-        )
-
-        html.append(
-            '<div class="speaker-info">'
-        )
-
-        html.append(
-            generate_team_member_html(
-                team_member,
-                root,
-                structure,
-                output_path
+        if team_member_html:
+            html.append(
+                team_member_html
             )
+
+        html.append(
+            '        </div>'
         )
 
         html.append(
-            "</div>"
+            ''
         )
 
         html.append(
-            "</details>"
+            '      </details>'
+        )
+
+        html.append(
+            ''
         )
 
     # ========================================================
-    # Close HTML
+    # CLOSE VA TEAM DETAILS
     # ========================================================
 
     html.append(
-        "</body>"
+        '  </details>'
     )
 
     html.append(
-        "</html>"
+        ''
+    )
+
+    html.append(
+        '</body>'
+    )
+
+    html.append(
+        '</html>'
     )
 
     # ========================================================
-    # Write output
+    # Write HTML
     # ========================================================
 
     output_path.write_text(
@@ -434,38 +481,40 @@ def main():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Generate VA Team HTML page "
-            "from PDF directories."
+            "Generate VA Team HTML from team-member "
+            "PDF directories."
         )
     )
 
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path("doc"),
-        help=(
-            "Root directory containing "
-            "team member folders."
-        )
+        required=True,
+        help="Root directory containing team member folders."
     )
 
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("va_team.html"),
+        required=True,
         help="Output HTML file."
     )
 
     args = parser.parse_args()
 
     root = args.root.resolve()
-
     output = args.output.resolve()
 
     if not root.exists():
 
         raise FileNotFoundError(
             f"Root directory does not exist: {root}"
+        )
+
+    if not root.is_dir():
+
+        raise NotADirectoryError(
+            f"Root path is not a directory: {root}"
         )
 
     generate_html(
@@ -477,6 +526,10 @@ def main():
         f"Generated: {output}"
     )
 
+
+# ============================================================
+# Run
+# ============================================================
 
 if __name__ == "__main__":
     main()
